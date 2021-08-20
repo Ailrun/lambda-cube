@@ -17,7 +17,7 @@ pLC = pTLam <|> pLam <|> pApp
 pTLam :: Parser ExtLCTerm
 pTLam =
   ExtLCTLam
-  <$> (atsignBackslash *> identifier)
+  <$> (atsignBackslash *> identifier <* colon <* asterisk)
   <*> (dot *> pLC)
 
 pLam :: Parser ExtLCTerm
@@ -46,7 +46,7 @@ pType = pUniv <|> pArr
 pUniv :: Parser ExtLCType
 pUniv =
   ExtLCUniv
-  <$> (exclamationMark *> identifier)
+  <$> (exclamationMark *> identifier <* colon <* asterisk)
   <*> (comma *> pType)
 
 pArr :: Parser ExtLCType
