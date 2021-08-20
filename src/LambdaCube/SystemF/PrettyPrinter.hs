@@ -20,7 +20,7 @@ prettyTypePrec = go
   where
     go _ LCBase      = "#"
     go _ (LCTVar i)  = Text.pack $ show i
-    go p (LCArr a b) = wrapIfSpaced (p > 1) [go 2 a, "->", go 1 b]
+    go p (LCArr a b) = wrapIfSpaced (p > 0) [go 1 a, "->", go 0 b]
     go p (LCUniv b)  = wrapIfSpaced (p > 0) ["! ,", go 0 b]
 
 prettyTermPrec :: Int -> LCTerm -> Text
@@ -32,4 +32,4 @@ prettyTermPrec = go
     go p (LCLam t b)  = wrapIfSpaced (p > 0) ["\\", pTP 0 t, ".", go 0 b]
     go p (LCApp f a)  = wrapIfSpaced (p > 1) [go 1 f, go 2 a]
     go p (LCTLam b)   = wrapIfSpaced (p > 0) ["@\\ .", go 0 b]
-    go p (LCTApp f t) = wrapIfSpaced (p > 1) [go 1 f, "@" <> pTP 2 t]
+    go p (LCTApp f t) = wrapIfSpaced (p > 1) [go 1 f, "@" <> pTP 1 t]
