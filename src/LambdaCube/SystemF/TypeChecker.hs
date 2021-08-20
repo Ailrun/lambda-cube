@@ -4,19 +4,21 @@ import           Data.List              (uncons)
 import           LambdaCube.SystemF.Ast
 
 substituteType :: Int -> LCType -> LCTerm -> LCTerm
-substituteType _ _ e@(LCVar _) = e
-substituteType n v (LCLam t b) = LCLam (substituteTypeInType n v t) (substituteType n v b)
-substituteType n v (LCApp f a) = LCApp (substituteType n v f) (substituteType n v a)
-substituteType n v (LCTLam b) = LCTLam (substituteType (n + 1) v b)
-substituteType n v (LCTApp f t) = LCTApp (substituteType n v f) (substituteTypeInType n v t)
+substituteType n v = go n
+  where
+    go _ e@(LCVar _)  = e
+    go m (LCLam t b)  = LCLam (substituteTypeInType m v t) $ go m b
+    go m (LCApp f a)  = go m f `LCApp` go m a
+    go m (LCTLam b)   = LCTLam $ go (m + 1) b
+    go m (LCTApp f t) = go m f `LCTApp` substituteTypeInType m v t
 
 substituteTypeInType :: Int -> LCType -> LCType -> LCType
-substituteTypeInType _ _ LCBase = LCBase
-substituteTypeInType n v e@(LCTVar m)
-  | n == m = v
-  | otherwise = e
-substituteTypeInType n v (LCArr a b) = LCArr (substituteTypeInType n v a) (substituteTypeInType n v b)
-substituteTypeInType n v (LCUniv a) = LCUniv (substituteTypeInType (n + 1) v a)
+substituteTypeInType n v = go n
+  where
+    go _ LCBase       = LCBase
+    go m e@(LCTVar l) = if m == l then v else e
+    go m (LCArr a b)  = go m a `LCArr` go m b
+    go m (LCUniv a)   = LCUniv $ go (m + 1) a
 
 infer :: LCTerm -> Maybe LCType
 infer = go []
@@ -33,6 +35,6 @@ infer = go []
     go tl (LCTLam b) = LCUniv <$> go tl b
     go tl (LCTApp f t)
       | Just (LCUniv rt) <- go tl f
-      = Just (substituteTypeInType 0 t rt)
+      = Just $ substituteTypeInType 0 t rt
       | otherwise
       = Nothing

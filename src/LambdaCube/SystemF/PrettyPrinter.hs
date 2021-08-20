@@ -16,14 +16,20 @@ prettyTerm :: LCTerm -> Text
 prettyTerm = prettyTermPrec 0
 
 prettyTypePrec :: Int -> LCType -> Text
-prettyTypePrec _ LCBase = "#"
-prettyTypePrec _ (LCTVar i) = Text.pack $ show i
-prettyTypePrec p (LCArr a b) = prettyWrapIf (p > 1) $ prettyTypePrec 2 a <> " -> " <> prettyTypePrec 1 b
-prettyTypePrec p (LCUniv b) = prettyWrapIf (p > 0) $ "! , " <> prettyTypePrec 0 b
+prettyTypePrec = go
+  where
+    go _ LCBase      = "#"
+    go _ (LCTVar i)  = Text.pack $ show i
+    go p (LCArr a b) = wrapIfSpaced (p > 1) [go 2 a, "->", go 1 b]
+    go p (LCUniv b)  = wrapIfSpaced (p > 0) ["! ,", go 0 b]
 
 prettyTermPrec :: Int -> LCTerm -> Text
-prettyTermPrec _ (LCVar i) = Text.pack $ show i
-prettyTermPrec p (LCLam t b) = prettyWrapIf (p > 0) $ "\\ " <> prettyTypePrec 0 t <> " . " <> prettyTermPrec 0 b
-prettyTermPrec p (LCApp f a) = prettyWrapIf (p > 1) $ prettyTermPrec 1 f <> " " <> prettyTermPrec 2 a
-prettyTermPrec p (LCTLam b) = prettyWrapIf (p > 0) $ "@\\ . " <> prettyTermPrec 0 b
-prettyTermPrec p (LCTApp f t) = prettyWrapIf (p > 1) $ prettyTermPrec 1 f <> " @" <> prettyTypePrec 2 t
+prettyTermPrec = go
+  where
+    pTP = prettyTypePrec
+
+    go _ (LCVar i)    = Text.pack $ show i
+    go p (LCLam t b)  = wrapIfSpaced (p > 0) ["\\", pTP 0 t, ".", go 0 b]
+    go p (LCApp f a)  = wrapIfSpaced (p > 1) [go 1 f, go 2 a]
+    go p (LCTLam b)   = wrapIfSpaced (p > 0) ["@\\ .", go 0 b]
+    go p (LCTApp f t) = wrapIfSpaced (p > 1) [go 1 f, "@" <> pTP 2 t]

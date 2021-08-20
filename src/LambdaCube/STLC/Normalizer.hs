@@ -3,20 +3,21 @@ module LambdaCube.STLC.Normalizer where
 import           LambdaCube.STLC.Ast
 
 substituteNormal :: Int -> LCNormalTerm -> LCNormalTerm -> LCNormalTerm
-substituteNormal n nv (LCNormLam t b) = LCNormLam t $ substituteNormal (n + 1) nv b
-substituteNormal n nv (LCNormNeut neut) = substituteNeutral n nv neut
+substituteNormal n nv = go n
+  where
+    go m (LCNormLam t b)   = LCNormLam t $ go (m + 1) b
+    go m (LCNormNeut neut) = substituteNeutral m nv neut
 
 substituteNeutral :: Int -> LCNormalTerm -> LCNeutralTerm -> LCNormalTerm
-substituteNeutral n nv e@(LCNeutVar m)
-  | n == m = nv
-  | otherwise = LCNormNeut e
-substituteNeutral n nv (LCNeutApp f a) =
-  case f' of
-    LCNormLam _ b   -> substituteNormal 0 a' b
-    LCNormNeut neut -> LCNormNeut $ neut `LCNeutApp` a'
+substituteNeutral n nv = go n
   where
-    f' = substituteNeutral n nv f
-    a' = substituteNormal n nv a
+    go m e@(LCNeutVar l) = if m == l then nv else LCNormNeut e
+    go m (LCNeutApp f a) =
+      case go m f of
+        LCNormLam _ b   -> substituteNormal 0 a' b
+        LCNormNeut neut -> LCNormNeut $ neut `LCNeutApp` a'
+      where
+        a' = substituteNormal m nv a
 
 normalize :: LCTerm -> LCNormalTerm
 normalize = go
@@ -24,9 +25,8 @@ normalize = go
     go (LCVar n) = LCNormNeut $ LCNeutVar n
     go (LCLam t b) = LCNormLam t $ go b
     go (LCApp f a) =
-      case nf of
-        LCNormLam t b   -> LCNormLam t $ substituteNormal 0 na b
-        LCNormNeut neut -> LCNormNeut $ neut `LCNeutApp` na
+      case go f of
+        LCNormLam t b   -> LCNormLam t $ substituteNormal 0 a' b
+        LCNormNeut neut -> LCNormNeut $ neut `LCNeutApp` a'
       where
-        nf = go f
-        na = go a
+        a' = go a

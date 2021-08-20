@@ -2,10 +2,17 @@
 module LambdaCube.Common.PrettyPrinter where
 
 import           Data.Text (Text)
+import qualified Data.Text as Text
 
-prettyWrap :: Text -> Text
-prettyWrap t = "(" <> t <> ")"
+wrapIfSpaced :: Bool -> [Text] -> Text
+wrapIfSpaced b = wrapIf b . spaced
 
-prettyWrapIf :: Bool -> Text -> Text
-prettyWrapIf True  = prettyWrap
-prettyWrapIf False = id
+wrap :: Text -> Text
+wrap t = "(" <> t <> ")"
+
+wrapIf :: Bool -> Text -> Text
+wrapIf True  = wrap
+wrapIf False = id
+
+spaced :: [Text] -> Text
+spaced = Text.intercalate " "
