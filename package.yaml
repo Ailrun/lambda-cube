@@ -100,31 +100,31 @@ library:
 
 # internal-libraries:
 
-executables:
-  LambdaCube:
-    ## Common fields
-    source-dirs:
-      - app
-    ghc-options:                    -threaded -rtsopts -with-rtsopts=-N
-    dependencies:
-      - LambdaCube
+# executables:
+  # LambdaCube:
+    # ## Common fields
+    # source-dirs:
+      # - app
+    # ghc-options:                    -threaded -rtsopts -with-rtsopts=-N
+    # dependencies:
+      # - lambda-cube
 
-      - base
-    ## Executable fields
-    main:                           Main.hs
-    # other-modules:
-    # generated-other-modules:
+      # - base
+    # ## Executable fields
+    # main:                           Main.hs
+    # # other-modules:
+    # # generated-other-modules:
 
 # executable:
 
 tests:
-  LambdaCube-test:
+  lambda-cube-test:
     ## Common fields
     source-dirs:
       - test
     ghc-options:                    -threaded -rtsopts -with-rtsopts=-N
     dependencies:
-      - LambdaCube
+      - lambda-cube
 
       - base
       - hspec
