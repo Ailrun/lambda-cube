@@ -80,7 +80,7 @@ library:
   source-dirs:
     - src
   dependencies:
-    - base ^>=4.12
+    - base >=4.12 && <5
     - megaparsec ^>=9.0.1
     - template-haskell
     - text
