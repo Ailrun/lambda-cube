@@ -1,8 +1,13 @@
 spec-version:                       0.31.0
 name:                               LambdaCube
 version:                            0.1.0.0
-# synopsis:
-# description:
+synopsis:                           Haskell implementation of (some of) lambda cube calculi
+description: |
+  Haskell implementation of the following 4 lambda calculi:
+  1. Simply typed lambda calculus
+  2. System F
+  3. System F omega underbar
+  4. System F omega
 category:                           Utilities
 homepage:                           https://github.com/Ailrun/LambdaCube#readme
 bug-reports:                        https://github.com/Ailrun/LambdaCube/issues
