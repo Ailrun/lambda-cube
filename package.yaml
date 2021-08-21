@@ -4,6 +4,7 @@ version:                            0.1.0.0
 synopsis:                           Haskell implementation of (some of) lambda cube calculi
 description: |
   Haskell implementation of the following 4 lambda calculi:
+
   1. Simply typed lambda calculus
   2. System F
   3. System F omega underbar
@@ -88,7 +89,7 @@ library:
     - base >=4.12 && <5
     - megaparsec ^>=9.0.1
     - template-haskell
-    - text
+    - text >=1.2.4.0
   ## Library fields
   # exposed:
   # exposed-modules:
