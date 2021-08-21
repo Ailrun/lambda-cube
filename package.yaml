@@ -1,5 +1,5 @@
 spec-version:                       0.31.0
-name:                               LambdaCube
+name:                               lambda-cube
 version:                            0.1.0.0
 synopsis:                           Haskell implementation of (some of) lambda cube calculi
 description: |
