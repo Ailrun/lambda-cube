@@ -10,8 +10,8 @@ description: |
   3. System F omega underbar
   4. System F omega
 category:                           Utilities
-homepage:                           https://github.com/Ailrun/LambdaCube#readme
-bug-reports:                        https://github.com/Ailrun/LambdaCube/issues
+homepage:                           https://github.com/Ailrun/lambda-cube#readme
+bug-reports:                        https://github.com/Ailrun/lambda-cube/issues
 author:                             Junyoung Clare Jang
 maintainer:                         jjc9310@gmail.com
 copyright:                          2021 Junyoung Clare Jang
@@ -24,7 +24,7 @@ extra-source-files:
 # extra-doc-files:
 # data-files:
 # data-dir:
-github:                             Ailrun/LambdaCube
+github:                             Ailrun/lambda-cube
 # custom-setup:
   # dependencies:
 
