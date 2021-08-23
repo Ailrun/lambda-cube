@@ -9,24 +9,24 @@ import qualified Data.Text                       as Text
 import           LambdaCube.Common.PrettyPrinter
 import           LambdaCube.SystemF.Ast
 
-prettyType :: LCType -> Text
-prettyType = prettyTypePrec 0
+prettyUnnamedType :: LCType -> Text
+prettyUnnamedType = prettyUnnamedTypePrec 0
 
-prettyTerm :: LCTerm -> Text
-prettyTerm = prettyTermPrec 0
+prettyUnnamedTerm :: LCTerm -> Text
+prettyUnnamedTerm = prettyUnnamedTermPrec 0
 
-prettyTypePrec :: Int -> LCType -> Text
-prettyTypePrec = go
+prettyUnnamedTypePrec :: Int -> LCType -> Text
+prettyUnnamedTypePrec = go
   where
     go _ LCBase      = "#"
     go _ (LCTVar i)  = Text.pack $ show i
     go p (LCArr a b) = wrapIfSpaced (p > 0) [go 1 a, "->", go 0 b]
     go p (LCUniv b)  = wrapIfSpaced (p > 0) ["! : * ,", go 0 b]
 
-prettyTermPrec :: Int -> LCTerm -> Text
-prettyTermPrec = go
+prettyUnnamedTermPrec :: Int -> LCTerm -> Text
+prettyUnnamedTermPrec = go
   where
-    pTP = prettyTypePrec
+    pTP = prettyUnnamedTypePrec
 
     go _ (LCVar i)    = Text.pack $ show i
     go p (LCLam t b)  = wrapIfSpaced (p > 0) ["\\ :", pTP 0 t, ".", go 0 b]

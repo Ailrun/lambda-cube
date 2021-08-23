@@ -9,25 +9,25 @@ import qualified Data.Text                       as Text
 import           LambdaCube.Common.PrettyPrinter
 import           LambdaCube.SystemFw.Ast
 
-prettyKind :: LCKind -> Text
-prettyKind = prettyKindPrec 0
+prettyUnnamedKind :: LCKind -> Text
+prettyUnnamedKind = prettyUnnamedKindPrec 0
 
-prettyType :: LCType -> Text
-prettyType = prettyTypePrec 0
+prettyUnnamedType :: LCType -> Text
+prettyUnnamedType = prettyUnnamedTypePrec 0
 
-prettyTerm :: LCTerm -> Text
-prettyTerm = prettyTermPrec 0
+prettyUnnamedTerm :: LCTerm -> Text
+prettyUnnamedTerm = prettyUnnamedTermPrec 0
 
-prettyKindPrec :: Int -> LCKind -> Text
-prettyKindPrec = go
+prettyUnnamedKindPrec :: Int -> LCKind -> Text
+prettyUnnamedKindPrec = go
   where
     go _ LCStar       = "*"
     go p (LCKArr a b) = wrapIfSpaced (p > 0) [go 1 a, "->", go 0 b]
 
-prettyTypePrec :: Int -> LCType -> Text
-prettyTypePrec = go
+prettyUnnamedTypePrec :: Int -> LCType -> Text
+prettyUnnamedTypePrec = go
   where
-    pKP = prettyKindPrec
+    pKP = prettyUnnamedKindPrec
 
     go _ LCBase        = "#"
     go _ (LCTVar i)    = Text.pack $ show i
@@ -36,11 +36,11 @@ prettyTypePrec = go
     go p (LCTTLam k b) = wrapIfSpaced (p > 0) ["\\ :", pKP 0 k, ".", go 0 b]
     go p (LCTTApp f a) = wrapIfSpaced (p > 1) [go 1 f, go 2 a]
 
-prettyTermPrec :: Int -> LCTerm -> Text
-prettyTermPrec = go
+prettyUnnamedTermPrec :: Int -> LCTerm -> Text
+prettyUnnamedTermPrec = go
   where
-    pKP = prettyKindPrec
-    pTP = prettyTypePrec
+    pKP = prettyUnnamedKindPrec
+    pTP = prettyUnnamedTypePrec
 
     go _ (LCVar i)    = Text.pack $ show i
     go p (LCLam t b)  = wrapIfSpaced (p > 0) ["\\ :", pTP 0 t, ".", go 0 b]
