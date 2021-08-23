@@ -1,16 +1,8 @@
 module LambdaCube.SystemFw_.TypeChecker where
 
-import           Data.List                (uncons)
+import           Data.List                         (uncons)
 import           LambdaCube.SystemFw_.Ast
-
-substituteTypeInType :: Int -> LCType -> LCType -> LCType
-substituteTypeInType n v = go n
-  where
-    go _ LCBase        = LCBase
-    go m e@(LCTVar l)  = if m == l then v else e
-    go m (LCArr a b)   = go m a `LCArr` go m b
-    go m (LCTTLam k b) = LCTTLam k $ go (m + 1) b
-    go m (LCTTApp f a) = go m f `LCTTApp` go m a
+import           LambdaCube.SystemFw_.Substitution
 
 reduceType :: LCType -> LCType
 reduceType = go
