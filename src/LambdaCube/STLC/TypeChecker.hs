@@ -3,15 +3,14 @@ module LambdaCube.STLC.TypeChecker where
 import           Data.List           (uncons)
 import           LambdaCube.STLC.Ast
 
-infer :: LCTerm -> Maybe LCType
+infer :: LCTerm -> LCType
 infer = go []
   where
-    go l (LCVar n) = fmap fst . uncons $ drop n l
-    go l (LCLam t b) = LCArr t <$> go (t : l) b
+    go l (LCVar n) = maybe (error "Out-of-scope variable") fst . uncons $ drop n l
+    go l (LCLam t b) = t `LCArr` go (t : l) b
     go l (LCApp f a)
-      | Just (LCArr at' rt) <- go l f
-      , Just at <- go l a
-      , at == at'
-      = Just rt
+      | LCArr at rt <- go l f
+      , at == go l a
+      = rt
       | otherwise
-      = Nothing
+      = error "Function argument type mismatch"

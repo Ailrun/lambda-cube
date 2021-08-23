@@ -88,6 +88,7 @@ library:
   dependencies:
     - base >=4.12 && <5
     - megaparsec ^>=9.0.1
+    - syb
     - template-haskell
     - text >=1.2.4.0
   ## Library fields

@@ -21,7 +21,7 @@ rightArrow, atsignBackslash :: Parser Text
 rightArrow = lex $ string "->"
 atsignBackslash = lex $ string "@\\"
 
-backslash, atsign, sharp, colon, dot, openParenthesis, closeParenthesis, exclamationMark, comma, asterisk :: Parser Char
+backslash, atsign, sharp, colon, dot, openParenthesis, closeParenthesis, exclamationMark, comma, asterisk, dollarsign :: Parser Char
 backslash        = lex $ char '\\'
 atsign           = lex $ char '@'
 sharp            = lex $ char '#'
@@ -32,6 +32,7 @@ closeParenthesis = lex $ char ')'
 exclamationMark  = lex $ char '!'
 comma            = lex $ char ','
 asterisk         = lex $ char '*'
+dollarsign       = lex $ char '$'
 
 identifier :: Parser Text
 identifier = lex $ (Text.pack .) . (:) <$> letterChar <*> many alphaNumChar
