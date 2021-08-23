@@ -7,6 +7,7 @@ import           Data.Maybe               (isJust)
 import           LambdaCube.Common.Parser
 import           LambdaCube.SystemF.Ast
 import           Text.Megaparsec
+import qualified Data.Text as Text
 
 pTopLC :: Parser ExtLCTerm
 pTopLC = topParser pLC
@@ -38,7 +39,13 @@ pAppArg = do
     else flip ExtLCApp <$> pATerm
 
 pATerm :: Parser ExtLCTerm
-pATerm = (ExtLCVar <$> identifier) <|> parenthesized pLC
+pATerm = pVar <|> pMVar <|> parenthesized pLC
+
+pVar :: Parser ExtLCTerm
+pVar = ExtLCVar <$> identifier
+
+pMVar :: Parser ExtLCTerm
+pMVar = ExtLCMVar <$> (dollarsign *> fmap Text.unpack identifier)
 
 pType :: Parser ExtLCType
 pType = pUniv <|> pArr
@@ -53,4 +60,13 @@ pArr :: Parser ExtLCType
 pArr = foldr1 ExtLCArr <$> sepBy1 pAType rightArrow
 
 pAType :: Parser ExtLCType
-pAType = (sharp $> ExtLCBase) <|> (ExtLCTVar <$> identifier) <|> parenthesized pType
+pAType = pBase <|> pTVar <|> pMTVar <|> parenthesized pType
+
+pBase :: Parser ExtLCType
+pBase = sharp $> ExtLCBase
+
+pTVar :: Parser ExtLCType
+pTVar = ExtLCTVar <$> identifier
+
+pMTVar :: Parser ExtLCType
+pMTVar = ExtLCMTVar <$> (dollarsign *> fmap Text.unpack identifier)

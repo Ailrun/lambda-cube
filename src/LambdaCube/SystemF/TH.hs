@@ -1,44 +1,45 @@
-module LambdaCube.SystemF.TH where
+module LambdaCube.SystemF.TH
+  ( lc
+  ) where
 
-import           Control.Monad                 ((<=<))
-import qualified Data.Text                     as Text
+import           Data.Data                  (Data)
+import           Data.Generics              (extQ)
+import           Data.Text                  (Text)
+import qualified Data.Text                  as Text
 import           LambdaCube.SystemF.Ast
-import           LambdaCube.SystemF.Elaborator
 import           LambdaCube.SystemF.Parser
-import           Language.Haskell.TH.Quote     (QuasiQuoter (..))
-import           Language.Haskell.TH.Syntax    (Loc (loc_start), Q, lift,
-                                                location)
-import qualified Text.Megaparsec               as P
-import qualified Text.Megaparsec.Error         as PE
+import           Language.Haskell.TH.Lib    (ExpQ, varE)
+import           Language.Haskell.TH.Quote  (QuasiQuoter (..))
+import           Language.Haskell.TH.Syntax (Loc (loc_start), dataToExpQ, lift,
+                                             location, mkName)
+import qualified Text.Megaparsec            as P
+import qualified Text.Megaparsec.Error      as PE
 
-systemF :: QuasiQuoter
-systemF =
+lc :: QuasiQuoter
+lc =
   QuasiQuoter
-    { quoteExp = lift <=< systemFQuoteExp
+    { quoteExp = expLc
     , quotePat = undefined
     , quoteType = undefined
     , quoteDec = undefined
     }
 
-systemFQuoteExp :: String -> Q ExtLCTerm
-systemFQuoteExp str = do
+expLc :: String -> ExpQ
+expLc str = do
   l <- location
   case P.parse pTopLC ("<quote at " <> show (loc_start l) <> ">") (Text.pack str) of
-    Right e  -> pure e
+    Right e  -> dataToExpQ converter e
     Left err -> fail $ PE.errorBundlePretty err
+  where
+    converter :: Data b => b -> Maybe ExpQ
+    converter =
+      const Nothing
+      `extQ` quotedMVar
+      `extQ` quotedMTVar
+      `extQ` (Just . lift :: Text -> Maybe ExpQ)
 
-elaboratedSystemF :: QuasiQuoter
-elaboratedSystemF =
-  QuasiQuoter
-    { quoteExp = lift <=< elaboratedSystemFQuoteExp
-    , quotePat = undefined
-    , quoteType = undefined
-    , quoteDec = undefined
-    }
+    quotedMVar (ExtLCMVar x) = Just . varE $ mkName x
+    quotedMVar _             = Nothing
 
-elaboratedSystemFQuoteExp :: String -> Q LCTerm
-elaboratedSystemFQuoteExp str = do
-  e <- systemFQuoteExp str
-  case elaborate e of
-    Right e' -> pure e'
-    Left err -> fail err
+    quotedMTVar (ExtLCMTVar x) = Just . varE $ mkName x
+    quotedMTVar _              = Nothing
