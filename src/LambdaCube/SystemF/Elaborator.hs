@@ -13,13 +13,13 @@ elaborate = go [] []
       = Right $ LCVar n
       | otherwise
       = Left $ "Term variable " <> Text.unpack x <> " is not in scope"
-    go tl vl (ExtLCLam x t b) = LCLam <$> typeElaborate tl t <*> go tl (x : vl) b
+    go tl vl (ExtLCLam x t b) = LCLam <$> elaborateType tl t <*> go tl (x : vl) b
     go tl vl (ExtLCApp f a) = LCApp <$> go tl vl f <*> go tl vl a
     go tl vl (ExtLCTLam x b) = LCTLam <$> go (x : tl) vl b
-    go tl vl (ExtLCTApp f t) = LCTApp <$> go tl vl f <*> typeElaborate tl t
+    go tl vl (ExtLCTApp f t) = LCTApp <$> go tl vl f <*> elaborateType tl t
 
-typeElaborate :: [Text] -> ExtLCType -> Either String LCType
-typeElaborate = go
+elaborateType :: [Text] -> ExtLCType -> Either String LCType
+elaborateType = go
   where
     go _ ExtLCBase = Right LCBase
     go l (ExtLCTVar x)
