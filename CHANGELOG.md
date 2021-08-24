@@ -22,12 +22,12 @@
 
 ## Breaking changes
 
-- Move lifters and substitutions into dedicated modules.
-- Rename pretty printers.
-- Rename elaborators.
-- Rename quasiquoter.
-- Remove elaborated quasiquoter.
-- Change the type of elaborator and type checker.
+- Lifters and substitutions into dedicated modules are moved.
+- Pretty printers are renamed.
+- Elaborators are renamed.
+- Quasiquoter are renamed.
+- Elaborated quasiquoters are remove.
+- The types of elaborators and type checkers are changed.
 
 # 0.1.0.0
 
