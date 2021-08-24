@@ -20,6 +20,7 @@ license-file:                       LICENSE
 # tested-with:
 # build-type:
 extra-source-files:
+  - CHANGELOG.md
   - README.md
 # extra-doc-files:
 # data-files:
