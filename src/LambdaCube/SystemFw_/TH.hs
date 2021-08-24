@@ -1,49 +1,86 @@
 module LambdaCube.SystemFw_.TH
-  ( lc
+  ( qTerm
+  , qType
+  , qKind
   ) where
 
-import           Data.Data                   (Data)
-import           Data.Generics               (extQ)
-import           Data.Text                   (Text)
-import qualified Data.Text                   as Text
+import           Data.Data                  (Data)
+import           Data.Generics              (extQ)
+import           LambdaCube.Common.TH
 import           LambdaCube.SystemFw_.Ast
 import           LambdaCube.SystemFw_.Parser
-import           Language.Haskell.TH.Lib     (ExpQ, varE)
-import           Language.Haskell.TH.Quote   (QuasiQuoter (..))
-import           Language.Haskell.TH.Syntax  (Loc (loc_start), dataToExpQ, lift,
-                                              location, mkName)
-import qualified Text.Megaparsec             as P
-import qualified Text.Megaparsec.Error       as PE
+import           Language.Haskell.TH.Lib    (ExpQ, varE)
+import           Language.Haskell.TH.Quote  (QuasiQuoter (..))
+import           Language.Haskell.TH.Syntax (mkName)
 
-lc :: QuasiQuoter
-lc =
+qTerm :: QuasiQuoter
+qTerm =
   QuasiQuoter
-    { quoteExp = expLc
+    { quoteExp = qExpTerm
     , quotePat = undefined
     , quoteType = undefined
     , quoteDec = undefined
     }
 
-expLc :: String -> ExpQ
-expLc str = do
-  l <- location
-  case P.parse pTopLC ("<quote at " <> show (loc_start l) <> ">") (Text.pack str) of
-    Right e  -> dataToExpQ converter e
-    Left err -> fail $ PE.errorBundlePretty err
+qExpTerm :: String -> ExpQ
+qExpTerm = qExpBase pTopTerm converter
   where
     converter :: Data b => b -> Maybe ExpQ
     converter =
-      const Nothing
+      converterBase
       `extQ` quotedMVar
       `extQ` quotedMTVar
       `extQ` quotedMKVar
-      `extQ` (Just . lift :: Text -> Maybe ExpQ)
 
     quotedMVar (ExtLCMVar x) = Just . varE $ mkName x
     quotedMVar _             = Nothing
 
     quotedMTVar (ExtLCMTVar x) = Just . varE $ mkName x
     quotedMTVar _              = Nothing
+
+    quotedMKVar (ExtLCMKVar x) = Just . varE $ mkName x
+    quotedMKVar _              = Nothing
+
+qType :: QuasiQuoter
+qType =
+  QuasiQuoter
+    { quoteExp = qExpType
+    , quotePat = undefined
+    , quoteType = undefined
+    , quoteDec = undefined
+    }
+
+qExpType :: String -> ExpQ
+qExpType = qExpBase pTopType converter
+  where
+    converter :: Data b => b -> Maybe ExpQ
+    converter =
+      converterBase
+      `extQ` quotedMTVar
+      `extQ` quotedMKVar
+
+    quotedMTVar (ExtLCMTVar x) = Just . varE $ mkName x
+    quotedMTVar _              = Nothing
+
+    quotedMKVar (ExtLCMKVar x) = Just . varE $ mkName x
+    quotedMKVar _              = Nothing
+
+qKind :: QuasiQuoter
+qKind =
+  QuasiQuoter
+    { quoteExp = qExpKind
+    , quotePat = undefined
+    , quoteType = undefined
+    , quoteDec = undefined
+    }
+
+qExpKind :: String -> ExpQ
+qExpKind = qExpBase pTopKind converter
+  where
+    converter :: Data b => b -> Maybe ExpQ
+    converter =
+      converterBase
+      `extQ` quotedMKVar
 
     quotedMKVar (ExtLCMKVar x) = Just . varE $ mkName x
     quotedMKVar _              = Nothing

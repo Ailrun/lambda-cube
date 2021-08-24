@@ -1,4 +1,8 @@
-module LambdaCube.SystemFw_.Parser where
+module LambdaCube.SystemFw_.Parser
+  ( pTopTerm
+  , pTopType
+  , pTopKind
+  ) where
 
 import           Data.Foldable            (Foldable (foldl'))
 import           Data.Functor             (($>))
@@ -7,30 +11,33 @@ import           LambdaCube.Common.Parser
 import           LambdaCube.SystemFw_.Ast
 import           Text.Megaparsec
 
-pTopLC :: Parser ExtLCTerm
-pTopLC = topParser pLC
+pTopTerm :: Parser ExtLCTerm
+pTopTerm = topParser pTerm
 
-pLC :: Parser ExtLCTerm
-pLC = pLam <|> pApp
+pTerm :: Parser ExtLCTerm
+pTerm = pLam <|> pApp
 
 pLam :: Parser ExtLCTerm
 pLam =
   ExtLCLam
   <$> (backslash *> identifier)
   <*> (colon *> pType)
-  <*> (dot *> pLC)
+  <*> (dot *> pTerm)
 
 pApp :: Parser ExtLCTerm
 pApp = foldl' ExtLCApp <$> pATerm <*> many pATerm
 
 pATerm :: Parser ExtLCTerm
-pATerm = pVar <|> pMVar <|> parenthesized pLC
+pATerm = pVar <|> pMVar <|> parenthesized pTerm
 
 pVar :: Parser ExtLCTerm
 pVar = ExtLCVar <$> identifier
 
 pMVar :: Parser ExtLCTerm
 pMVar = ExtLCMVar <$> (dollarsign *> fmap Text.unpack identifier)
+
+pTopType :: Parser ExtLCType
+pTopType = topParser pType
 
 pType :: Parser ExtLCType
 pType = pTTLam <|> pArr
@@ -59,6 +66,9 @@ pTVar = ExtLCTVar <$> identifier
 
 pMTVar :: Parser ExtLCType
 pMTVar = ExtLCMTVar <$> (dollarsign *> fmap Text.unpack identifier)
+
+pTopKind :: Parser ExtLCKind
+pTopKind = topParser pKind
 
 pKind :: Parser ExtLCKind
 pKind = foldr1 ExtLCKArr <$> sepBy1 pAKind rightArrow

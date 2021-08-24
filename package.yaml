@@ -1,6 +1,6 @@
 spec-version:                       0.31.0
 name:                               lambda-cube
-version:                            0.2.0.0
+version:                            0.3.0.0
 synopsis:                           Haskell implementation of (some of) lambda cube calculi
 description: |
   Haskell implementation of the following 4 lambda calculi:
