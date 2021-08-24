@@ -7,6 +7,8 @@
 ## Breaking changes
 
 - Names of quasiquoters are changed.
+- The order of arguments for substitution are changed.
+- Non-Ast modules now have explicit export lists.
 
 # 0.2.0.0
 

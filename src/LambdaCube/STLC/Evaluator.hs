@@ -1,4 +1,6 @@
-module LambdaCube.STLC.Evaluator where
+module LambdaCube.STLC.Evaluator
+  ( evaluate
+  ) where
 
 import           LambdaCube.STLC.Ast
 import           LambdaCube.STLC.Substitution
@@ -11,4 +13,4 @@ evaluate = go
     go (LCApp f a)
       | LCValLam _ b <- go f
       , v <- go a
-      = go $ substituteValue 0 v b
+      = go $ substituteValue v 0 b
