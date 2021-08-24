@@ -4,6 +4,7 @@ import           Data.Foldable            (Foldable (foldl'))
 import           Data.Function            ((&))
 import           Data.Functor             (($>))
 import           Data.Maybe               (isJust)
+import qualified Data.Text                as Text
 import           LambdaCube.Common.Parser
 import           LambdaCube.SystemFw.Ast
 import           Text.Megaparsec
@@ -39,7 +40,13 @@ pAppArg = do
     else flip ExtLCApp <$> pATerm
 
 pATerm :: Parser ExtLCTerm
-pATerm = (ExtLCVar <$> identifier) <|> parenthesized pLC
+pATerm = pVar <|> pMVar <|> parenthesized pLC
+
+pVar :: Parser ExtLCTerm
+pVar = ExtLCVar <$> identifier
+
+pMVar :: Parser ExtLCTerm
+pMVar = ExtLCMVar <$> (dollarsign *> fmap Text.unpack identifier)
 
 pType :: Parser ExtLCType
 pType = pTTLam <|> pUniv <|> pArr
@@ -65,10 +72,25 @@ pTTApp :: Parser ExtLCType
 pTTApp = foldl' ExtLCTTApp <$> pAType <*> many pAType
 
 pAType :: Parser ExtLCType
-pAType = (sharp $> ExtLCBase) <|> (ExtLCTVar <$> identifier) <|> parenthesized pType
+pAType = pBase <|> pTVar <|> pMTVar <|> parenthesized pType
 
-pKind :: Parser LCKind
-pKind = foldr1 LCKArr <$> sepBy1 pAKind rightArrow
+pBase :: Parser ExtLCType
+pBase = sharp $> ExtLCBase
 
-pAKind :: Parser LCKind
-pAKind = (asterisk $> LCStar) <|> parenthesized pKind
+pTVar :: Parser ExtLCType
+pTVar = ExtLCTVar <$> identifier
+
+pMTVar :: Parser ExtLCType
+pMTVar = ExtLCMTVar <$> (dollarsign *> fmap Text.unpack identifier)
+
+pKind :: Parser ExtLCKind
+pKind = foldr1 ExtLCKArr <$> sepBy1 pAKind rightArrow
+
+pAKind :: Parser ExtLCKind
+pAKind = pStar <|> pMKVar <|> parenthesized pKind
+
+pStar :: Parser ExtLCKind
+pStar = asterisk $> ExtLCStar
+
+pMKVar :: Parser ExtLCKind
+pMKVar = ExtLCMKVar <$> (dollarsign *> fmap Text.unpack identifier)

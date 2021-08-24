@@ -19,50 +19,47 @@ reduceType = go
       | otherwise
       = error "Did you really kind check this?"
 
-infer :: LCTerm -> Maybe LCType
+infer :: LCTerm -> LCType
 infer = go []
   where
-    go tl (LCVar n) = fmap fst . uncons $ drop n tl
+    go tl (LCVar n) = maybe (error "Out-of-scope variable") fst . uncons $ drop n tl
     go tl (LCLam t b)
-      | Just LCStar <- inferKind t
-      = LCArr v <$> go (v : tl) b
+      | LCStar <- inferKind t
+      = v `LCArr` go (v : tl) b
       | otherwise
-      = Nothing
+      = error "Function argument kind mismatch"
       where
         v = reduceType t
     go tl (LCApp f a)
-      | Just (LCArr at' rt) <- go tl f
-      , Just at <- go tl a
-      , at == at'
-      = Just rt
+      | LCArr at rt <- go tl f
+      , at == go tl a
+      = rt
       | otherwise
-      = Nothing
-    go tl (LCTLam k b) = LCUniv k <$> go tl b
+      = error "Function argument type mismatch"
+    go tl (LCTLam k b) = LCUniv k $ go tl b
     go tl (LCTApp f t)
-      | Just (LCUniv tk' rt) <- go tl f
-      , Just tk <- inferKind t
-      , tk == tk'
-      = Just $ substituteTypeInType 0 t rt
+      | LCUniv tk rt <- go tl f
+      , tk == inferKind t
+      = substituteTypeInType 0 t rt
       | otherwise
-      = Nothing
+      = error "Function argument kind mismatch"
 
-inferKind :: LCType -> Maybe LCKind
+inferKind :: LCType -> LCKind
 inferKind = go []
   where
-    go _  LCBase = Just LCStar
-    go kl (LCTVar n) = fmap fst . uncons $ drop n kl
+    go _  LCBase = LCStar
+    go kl (LCTVar n) = maybe (error "Out-of-scope variable") fst . uncons $ drop n kl
     go kl (LCArr a b)
-      | Just LCStar <- go kl a
-      , Just LCStar <- go kl b
-      = Just LCStar
+      | LCStar <- go kl a
+      , LCStar <- go kl b
+      = LCStar
       | otherwise
-      = Nothing
+      = error "Arrow kind mismatch"
     go kl (LCUniv k a) = go (k : kl) a
-    go kl (LCTTLam k b) = LCKArr k <$> go (k : kl) b
+    go kl (LCTTLam k b) = LCKArr k $ go (k : kl) b
     go kl (LCTTApp f a)
-      | Just (LCKArr ak' rk) <- go kl f
-      , Just ak <- go kl a
-      , ak == ak'
-      = Just rk
+      | LCKArr ak rk <- go kl f
+      , ak == go kl a
+      = rk
       | otherwise
-      = Nothing
+      = error "Function argument kind mismatch"
