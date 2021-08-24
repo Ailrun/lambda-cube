@@ -1,4 +1,8 @@
-module LambdaCube.Common.TH where
+module LambdaCube.Common.TH
+  ( qExpBase
+
+  , converterBase
+  ) where
 
 import           Data.Data                  (Data)
 import           Data.Generics              (extQ)

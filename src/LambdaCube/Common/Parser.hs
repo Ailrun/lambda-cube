@@ -1,5 +1,26 @@
 {-# LANGUAGE OverloadedStrings #-}
-module LambdaCube.Common.Parser where
+module LambdaCube.Common.Parser
+  ( Parser
+
+  , topParser
+  , parenthesized
+  , identifier
+
+  , rightArrow
+  , atsignBackslash
+
+  , backslash
+  , atsign
+  , sharp
+  , colon
+  , dot
+  , openParenthesis
+  , closeParenthesis
+  , exclamationMark
+  , comma
+  , asterisk
+  , dollarsign
+  ) where
 
 import           Prelude              hiding (lex)
 
@@ -17,6 +38,9 @@ topParser = between space eof
 parenthesized :: Parser a -> Parser a
 parenthesized = between openParenthesis closeParenthesis
 
+identifier :: Parser Text
+identifier = lex $ (Text.pack .) . (:) <$> letterChar <*> many alphaNumChar
+
 rightArrow, atsignBackslash :: Parser Text
 rightArrow = lex $ string "->"
 atsignBackslash = lex $ string "@\\"
@@ -33,9 +57,6 @@ exclamationMark  = lex $ char '!'
 comma            = lex $ char ','
 asterisk         = lex $ char '*'
 dollarsign       = lex $ char '$'
-
-identifier :: Parser Text
-identifier = lex $ (Text.pack .) . (:) <$> letterChar <*> many alphaNumChar
 
 lex :: Parser a -> Parser a
 lex = (<* space)
