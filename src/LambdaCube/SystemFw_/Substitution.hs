@@ -1,3 +1,4 @@
+{-# LANGUAGE ViewPatterns #-}
 module LambdaCube.SystemFw_.Substitution
   ( substituteTypeInType
   , substituteValue
@@ -19,18 +20,22 @@ substituteNormalInNormal v = substDefNormalInNormal (v, 0)
 substDefTypeInType :: (LCType, Int) -> Int -> LCType -> LCType
 substDefTypeInType = go
   where
-    go _      _ LCBase        = LCBase
-    go dv     p e@(LCTVar q)  = if p == q then shiftType dv else e
-    go dv     p (LCArr a b)   = go dv p a `LCArr` go dv p b
-    go (v, r) p (LCTTLam k b) = LCTTLam k $ go (v, r + 1) (p + 1) b
-    go dv     p (LCTTApp f a) = go dv p f `LCTTApp` go dv p a
+    go _      _ LCBase                     = LCBase
+    go dv     p (LCTVar ((== p) -> True))  = shiftType dv
+    go _      p e@(LCTVar ((< p) -> True)) = e
+    go _      _ (LCTVar q)                 = LCTVar $ q - 1
+    go dv     p (LCArr a b)                = go dv p a `LCArr` go dv p b
+    go (v, r) p (LCTTLam k b)              = LCTTLam k $ go (v, r + 1) (p + 1) b
+    go dv     p (LCTTApp f a)              = go dv p f `LCTTApp` go dv p a
 
 substDefValue :: (LCValue, Int) -> Int -> LCTerm -> LCTerm
 substDefValue = go
   where
-    go dv     x e@(LCVar y) = if x == y then shiftValue dv else e
-    go (v, s) x (LCLam t b) = LCLam t $ go (v, s + 1) (x + 1) b
-    go dv     x (LCApp f a) = go dv x f `LCApp` go dv x a
+    go dv     x (LCVar ((== x) -> True))  = shiftValue dv
+    go _      x e@(LCVar ((< x) -> True)) = e
+    go _      _ (LCVar y)                 = LCVar $ y - 1
+    go (v, s) x (LCLam t b)               = LCLam t $ go (v, s + 1) (x + 1) b
+    go dv     x (LCApp f a)               = go dv x f `LCApp` go dv x a
 
 substDefNormalInNormal :: (LCNormalTerm, Int) -> Int -> LCNormalTerm -> LCNormalTerm
 substDefNormalInNormal = go
@@ -39,11 +44,13 @@ substDefNormalInNormal = go
     go dv     x (LCNormNeut nt) = substDefNormalInNeutral dv x nt
 
 substDefNormalInNeutral :: (LCNormalTerm, Int) -> Int -> LCNeutralTerm -> LCNormalTerm
-substDefNormalInNeutral = go
+substDefNormalInNeutral dv x = go
   where
-    go dv x e@(LCNeutVar y) = if x == y then shiftNormal dv else LCNormNeut e
-    go dv x (LCNeutApp f a) =
-      case go dv x f of
+    go (LCNeutVar ((== x) -> True)) = shiftNormal dv
+    go e@(LCNeutVar ((< x) -> True)) = LCNormNeut e
+    go (LCNeutVar y) = LCNormNeut . LCNeutVar $ y - 1
+    go (LCNeutApp f a) =
+      case go f of
         LCNormLam _ b -> substituteNormalInNormal a' 0 b
         LCNormNeut nt -> LCNormNeut $ nt `LCNeutApp` a'
       where
@@ -52,7 +59,7 @@ substDefNormalInNeutral = go
 shift :: (LCTerm, Int) -> LCTerm
 shift (v, s) = go 0 v
   where
-    go n (LCVar x) = LCVar $ if x < n then x else x + s
+    go n (LCVar x)   = LCVar $ if x < n then x else x + s
     go n (LCLam t b) = LCLam t $ go (n + 1) b
     go n (LCApp f a) = go n f `LCApp` go n a
 
@@ -83,5 +90,5 @@ shiftNormalMin n' (v, s) = go n' v
 shiftNeutralMin :: Int -> (LCNeutralTerm, Int) -> LCNeutralTerm
 shiftNeutralMin n (v, s) = go v
   where
-    go (LCNeutVar x)    = LCNeutVar $ if x < n then x else x + s
-    go (LCNeutApp f a)  = go f `LCNeutApp` shiftNormalMin n (a, s)
+    go (LCNeutVar x)   = LCNeutVar $ if x < n then x else x + s
+    go (LCNeutApp f a) = go f `LCNeutApp` shiftNormalMin n (a, s)
