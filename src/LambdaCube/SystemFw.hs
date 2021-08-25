@@ -1,6 +1,7 @@
 module LambdaCube.SystemFw
   ( module LambdaCube.SystemFw.Ast
   , module LambdaCube.SystemFw.Elaborator
+  , module LambdaCube.SystemFw.Evaluator
   , module LambdaCube.SystemFw.Lifter
   , module LambdaCube.SystemFw.Normalizer
   , module LambdaCube.SystemFw.Parser
@@ -13,6 +14,7 @@ module LambdaCube.SystemFw
 import LambdaCube.SystemFw.Ast
 
 import LambdaCube.SystemFw.Elaborator
+import LambdaCube.SystemFw.Evaluator
 import LambdaCube.SystemFw.Lifter
 import LambdaCube.SystemFw.Normalizer
 import LambdaCube.SystemFw.Parser

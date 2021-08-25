@@ -1,6 +1,7 @@
 module LambdaCube.SystemF
   ( module LambdaCube.SystemF.Ast
   , module LambdaCube.SystemF.Elaborator
+  , module LambdaCube.SystemF.Evaluator
   , module LambdaCube.SystemF.Lifter
   , module LambdaCube.SystemF.Normalizer
   , module LambdaCube.SystemF.Parser
@@ -13,6 +14,7 @@ module LambdaCube.SystemF
 import LambdaCube.SystemF.Ast
 
 import LambdaCube.SystemF.Elaborator
+import LambdaCube.SystemF.Evaluator
 import LambdaCube.SystemF.Lifter
 import LambdaCube.SystemF.Normalizer
 import LambdaCube.SystemF.Parser

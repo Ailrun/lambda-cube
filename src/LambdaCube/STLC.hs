@@ -1,6 +1,7 @@
 module LambdaCube.STLC
   ( module LambdaCube.STLC.Ast
   , module LambdaCube.STLC.Elaborator
+  , module LambdaCube.STLC.Evaluator
   , module LambdaCube.STLC.Lifter
   , module LambdaCube.STLC.Normalizer
   , module LambdaCube.STLC.Parser
@@ -13,6 +14,7 @@ module LambdaCube.STLC
 import LambdaCube.STLC.Ast
 
 import LambdaCube.STLC.Elaborator
+import LambdaCube.STLC.Evaluator
 import LambdaCube.STLC.Lifter
 import LambdaCube.STLC.Normalizer
 import LambdaCube.STLC.Parser

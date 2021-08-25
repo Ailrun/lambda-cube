@@ -3,6 +3,7 @@
 ## Main updates
 
 - Type/Kind level quasiquoter are added.
+- Evaluators are added to the top-level modules.
 
 ## Bug fixed
 
