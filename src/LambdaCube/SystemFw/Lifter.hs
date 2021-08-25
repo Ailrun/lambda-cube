@@ -1,4 +1,7 @@
-module LambdaCube.SystemFw.Lifter where
+module LambdaCube.SystemFw.Lifter
+  ( liftLCValue
+  , liftLCNormal
+  ) where
 
 import           LambdaCube.SystemFw.Ast
 
@@ -12,6 +15,6 @@ liftLCNormal (LCNormTLam k b) = LCTLam k $ liftLCNormal b
 liftLCNormal (LCNormNeut nt)  = liftLCNeutral nt
 
 liftLCNeutral :: LCNeutralTerm -> LCTerm
-liftLCNeutral (LCNeutVar n)    = LCVar n
+liftLCNeutral (LCNeutVar x)    = LCVar x
 liftLCNeutral (LCNeutApp f a)  = liftLCNeutral f `LCApp` liftLCNormal a
 liftLCNeutral (LCNeutTApp f t) = liftLCNeutral f `LCTApp` t

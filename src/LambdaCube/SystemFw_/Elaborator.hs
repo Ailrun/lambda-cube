@@ -1,4 +1,8 @@
-module LambdaCube.SystemFw_.Elaborator where
+module LambdaCube.SystemFw_.Elaborator
+  ( elaborate
+  , elaborateType
+  , elaborateKind
+  ) where
 
 import           Data.List                (elemIndex)
 import qualified Data.Text                as Text
@@ -20,13 +24,13 @@ elaborateType :: ExtLCType -> LCType
 elaborateType = go []
   where
     go _ ExtLCBase = LCBase
-    go l (ExtLCTVar x)
-      | Just n <- x `elemIndex` l
+    go l (ExtLCTVar p)
+      | Just n <- p `elemIndex` l
       = LCTVar n
       | otherwise
-      = error $ "Type variable " <> Text.unpack x <> " is not in scope"
+      = error $ "Type variable " <> Text.unpack p <> " is not in scope"
     go l (ExtLCArr a b) = go l a `LCArr` go l b
-    go l (ExtLCTTLam x k b) = LCTTLam (elaborateKind k) $ go (x : l) b
+    go l (ExtLCTTLam p k b) = LCTTLam (elaborateKind k) $ go (p : l) b
     go l (ExtLCTTApp f a) = go l f `LCTTApp` go l a
     go _ (ExtLCMTVar _) = error "invalid TemplateHaskell code splicer"
 

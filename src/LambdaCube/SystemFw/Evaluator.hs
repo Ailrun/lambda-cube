@@ -1,4 +1,6 @@
-module LambdaCube.SystemFw.Evaluator where
+module LambdaCube.SystemFw.Evaluator
+  ( evaluate
+  ) where
 
 import           LambdaCube.SystemFw.Ast
 import           LambdaCube.SystemFw.Substitution
@@ -11,12 +13,12 @@ evaluate = go
     go (LCApp f a)
       | LCValLam _ b <- go f
       , v <- go a
-      = go $ substituteValue 0 v b
+      = go $ substituteValue v 0 b
       | otherwise
       = error "Did you really type check this?"
     go (LCTLam k b) = LCValTLam k b
     go (LCTApp f t)
       | LCValTLam _ b <- go f
-      = go $ substituteType 0 t b
+      = go $ substituteType t 0 b
       | otherwise
       = error "Did you really type check this?"

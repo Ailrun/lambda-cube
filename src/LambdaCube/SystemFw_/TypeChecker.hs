@@ -1,4 +1,9 @@
-module LambdaCube.SystemFw_.TypeChecker where
+module LambdaCube.SystemFw_.TypeChecker
+  ( reduceType
+
+  , infer
+  , inferKind
+  ) where
 
 import           Data.List                         (uncons)
 import           LambdaCube.SystemFw_.Ast
@@ -14,7 +19,7 @@ reduceType = go
     go (LCTTApp f a)
       | LCTTLam _ b <- go f
       , v <- go a
-      = go $ substituteTypeInType 0 v b
+      = go $ substituteTypeInType v 0 b
       | otherwise
       = error "Did you really kind check this?"
 

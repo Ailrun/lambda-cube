@@ -30,7 +30,7 @@ substDefType = go
     go _      _ e@(LCVar _)  = e
     go dv     p (LCLam t b)  = LCLam (substDefTypeInType dv p t) $ go dv p b
     go dv     p (LCApp f a)  = go dv p f `LCApp` go dv p a
-    go (v, s) p (LCTLam b)   = LCTLam $ go (v, s + 1) (p + 1) b
+    go (v, r) p (LCTLam b)   = LCTLam $ go (v, r + 1) (p + 1) b
     go dv     p (LCTApp f t) = go dv p f `LCTApp` substDefTypeInType dv p t
 
 substDefTypeInType :: (LCType, Int) -> Int -> LCType -> LCType
@@ -39,7 +39,7 @@ substDefTypeInType = go
     go _      _ LCBase       = LCBase
     go dv     p e@(LCTVar q) = if p == q then shiftType dv else e
     go dv     p (LCArr a b)  = go dv p a `LCArr` go dv p b
-    go (v, s) p (LCUniv a)   = LCUniv $ go (v, s + 1) (p + 1) a
+    go (v, r) p (LCUniv a)   = LCUniv $ go (v, r + 1) (p + 1) a
 
 substDefValue :: (LCValue, Int, Int) -> Int -> LCTerm -> LCTerm
 substDefValue = go

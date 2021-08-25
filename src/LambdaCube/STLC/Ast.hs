@@ -4,13 +4,6 @@ import           Data.Data                  (Data)
 import           Data.Text                  (Text)
 import           Language.Haskell.TH.Syntax (Lift)
 
-data ExtLCType
-  = ExtLCBase
-  | ExtLCArr ExtLCType ExtLCType
-  | ExtLCMTVar String
-  deriving stock (Eq, Show, Data, Lift)
-infixr 5 `ExtLCArr`
-
 data ExtLCTerm
   = ExtLCVar Text
   | ExtLCLam Text ExtLCType ExtLCTerm
@@ -19,11 +12,12 @@ data ExtLCTerm
   deriving stock (Eq, Show, Data, Lift)
 infixl 6 `ExtLCApp`
 
-data LCType
-  = LCBase
-  | LCArr LCType LCType
+data ExtLCType
+  = ExtLCBase
+  | ExtLCArr ExtLCType ExtLCType
+  | ExtLCMTVar String
   deriving stock (Eq, Show, Data, Lift)
-infixr 5 `LCArr`
+infixr 5 `ExtLCArr`
 
 data LCTerm
   = LCVar Int
@@ -31,6 +25,12 @@ data LCTerm
   | LCApp LCTerm LCTerm
   deriving stock (Eq, Show, Data, Lift)
 infixl 6 `LCApp`
+
+data LCType
+  = LCBase
+  | LCArr LCType LCType
+  deriving stock (Eq, Show, Data, Lift)
+infixr 5 `LCArr`
 
 data LCValue
   = LCValLam LCType LCTerm

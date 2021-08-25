@@ -1,4 +1,9 @@
-module LambdaCube.SystemFw.TypeChecker where
+module LambdaCube.SystemFw.TypeChecker
+  ( reduceType
+
+  , infer
+  , inferKind
+  ) where
 
 import           Data.List                        (uncons)
 import           LambdaCube.SystemFw.Ast
@@ -15,37 +20,37 @@ reduceType = go
     go (LCTTApp f a)
       | LCTTLam _ b <- go f
       , v <- go a
-      = go $ substituteTypeInType 0 v b
+      = go $ substituteTypeInType v 0 b
       | otherwise
       = error "Did you really kind check this?"
 
 infer :: LCTerm -> LCType
-infer = go []
+infer = go [] []
   where
-    go tl (LCVar n) = maybe (error "Out-of-scope variable") fst . uncons $ drop n tl
-    go tl (LCLam t b)
-      | LCStar <- inferKind t
-      = v `LCArr` go (v : tl) b
+    go _  tl (LCVar n) = maybe (error "Out-of-scope variable") fst . uncons $ drop n tl
+    go kl tl (LCLam t b)
+      | LCStar <- inferKind kl t
+      = v `LCArr` go kl (v : tl) b
       | otherwise
       = error "Function argument kind mismatch"
       where
         v = reduceType t
-    go tl (LCApp f a)
-      | LCArr at rt <- go tl f
-      , at == go tl a
+    go kl tl (LCApp f a)
+      | LCArr at rt <- go kl tl f
+      , at == go kl tl a
       = rt
       | otherwise
       = error "Function argument type mismatch"
-    go tl (LCTLam k b) = LCUniv k $ go tl b
-    go tl (LCTApp f t)
-      | LCUniv tk rt <- go tl f
-      , tk == inferKind t
-      = substituteTypeInType 0 t rt
+    go kl tl (LCTLam k b) = LCUniv k $ go (k : kl) tl b
+    go kl tl (LCTApp f t)
+      | LCUniv tk rt <- go kl tl f
+      , tk == inferKind kl t
+      = substituteTypeInType t 0 rt
       | otherwise
       = error "Function argument kind mismatch"
 
-inferKind :: LCType -> LCKind
-inferKind = go []
+inferKind :: [LCKind] -> LCType -> LCKind
+inferKind = go
   where
     go _  LCBase = LCStar
     go kl (LCTVar n) = maybe (error "Out-of-scope variable") fst . uncons $ drop n kl

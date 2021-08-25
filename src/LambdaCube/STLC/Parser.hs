@@ -14,7 +14,7 @@ pTopTerm :: Parser ExtLCTerm
 pTopTerm = topParser pTerm
 
 pTerm :: Parser ExtLCTerm
-pTerm = pLam<|> pApp
+pTerm = pLam <|> pApp
 
 pLam :: Parser ExtLCTerm
 pLam =
