@@ -12,7 +12,7 @@ normalize = go
     go (LCLam t b) = LCNormLam t $ go b
     go (LCApp f a) =
       case go f of
-        LCNormLam t b -> LCNormLam t $ substituteNormalInNormal a' 0 b
+        LCNormLam _ b -> substituteNormalInNormal a' 0 b
         LCNormNeut nt -> LCNormNeut $ nt `LCNeutApp` a'
       where
         a' = go a

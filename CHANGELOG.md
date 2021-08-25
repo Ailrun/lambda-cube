@@ -9,6 +9,7 @@
 ## Bug fixed
 
 - Substitutions are fixed with valid shifting
+- STLC normalizer is fixed with valid beta-reduction
 
 ## Breaking changes
 
