@@ -131,9 +131,11 @@ tests:
 
       - base
       - hspec
-      - QuickCheck
+      - tasty
+      - tasty-hspec
+      - text
     ## Test fields
-    main:                           Spec.hs
+    main:                           Test.hs
     # other-modules:
     # generated-other-modules:
 
