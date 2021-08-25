@@ -5,6 +5,7 @@
 - Type/Kind level quasiquoter are added.
 - Evaluators are added to the top-level modules.
 - STLC and System F omega are tested with various examples.
+- Identifiers now accepts `_`.
 
 ## Bug fixed
 

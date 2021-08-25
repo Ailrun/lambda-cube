@@ -39,7 +39,7 @@ parenthesized :: Parser a -> Parser a
 parenthesized = between openParenthesis closeParenthesis
 
 identifier :: Parser Text
-identifier = lex $ (Text.pack .) . (:) <$> letterChar <*> many alphaNumChar
+identifier = lex $ (Text.pack .) . (:) <$> letterChar <*> many (alphaNumChar <|> char '_')
 
 rightArrow, atsignBackslash :: Parser Text
 rightArrow = lex $ string "->"
