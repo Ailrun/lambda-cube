@@ -3,12 +3,27 @@ module LambdaCube.STLCTest
   ( tests
   ) where
 
-import           Control.Monad    (forM_)
-import qualified Data.Text        as Text
+import qualified Control.Exception
+import           Control.Monad              (forM_, void)
+import qualified Data.Text                  as Text
 import           LambdaCube.STLC
+import           LambdaCube.STLCTestExample
+import           LambdaCube.TestUtil
 import           Test.Hspec
 import           Test.Tasty
-import           Test.Tasty.Hspec (testSpec)
+import           Test.Tasty.Hspec           (testSpec)
+
+newtype TestLCType = TestLCType LCType
+  deriving newtype (Eq)
+
+instance Show TestLCType where
+  show (TestLCType ty) = Text.unpack $ prettyUnnamedType ty
+
+newtype TestLCTerm = TestLCTerm LCTerm
+  deriving newtype (Eq)
+
+instance Show TestLCTerm where
+  show (TestLCTerm tm) = Text.unpack $ prettyUnnamedTerm tm
 
 tests :: IO TestTree
 tests = testSpec "STLC tests" spec
@@ -20,104 +35,134 @@ spec = do
   describe "STLC normalize" normalizeSpec
 
 inferSpec :: SpecWith ()
-inferSpec = forM_ inferSpecCases $ \(extTm, extTy) -> do
+inferSpec = forM_ inferSpecCases $ \(mkTitle, extTm, extTy) -> do
   let
     tm = elaborate extTm
     ty = elaborateType extTy
-    caseTitle =
-      concat
-      [ "infer ("
-      , Text.unpack (prettyUnnamedTerm tm)
-      , ") should be ("
-      , Text.unpack (prettyUnnamedType ty)
-      , ")"
-      ]
-  it caseTitle $ do
-    infer tm `shouldBe` ty
+  it (mkTitle tm ty) $ do
+    TestLCType (infer tm) `shouldBe` TestLCType ty
 
-inferSpecCases :: [(ExtLCTerm, ExtLCType)]
+inferSpecCases :: [(LCTerm -> LCType -> String, ExtLCTerm, ExtLCType)]
 inferSpecCases =
-  [ ( baseId
-    , baseArr
+  [ ( const2 "infer lcBaseId should be lcBaseArr"
+    , lcBaseId
+    , lcBaseArr
     )
-  , ( [qTerm| \x : # . (\x : $baseArr . x) $baseId x |]
-    , baseArr
+  , ( makeDefaultInferTitle
+    , [qTerm| \x : # . $lcBaseArrId $lcBaseId x |]
+    , lcBaseArr
     )
-  , ( [qTerm| \abc : # . (\fdd : $baseArr . fdd abc) |]
-    , [qType| # -> $baseArr -> # |]
+  , ( makeDefaultInferTitle
+    , [qTerm| \x : $lcBaseArr . \y : $lcBaseArr . \z : # . x (y z) |]
+    , [qType| $lcBaseArr -> $lcBaseArr -> $lcBaseArr |]
     )
-  , ( pCN3
-    , pCNTy
+  , ( makeDefaultInferTitle
+    , [qTerm| \abc : # . (\fdd : $lcBaseArr . fdd abc) |]
+    , [qType| # -> $lcBaseArr -> # |]
     )
-  , ( pCNAdd
-    , [qType| $pCNTy -> $pCNTy -> $pCNTy |]
+  , ( const2 "infer pcn3 should be pcnTy"
+    , lcPCN3
+    , lcPCNTy
     )
-  , ( [qTerm| $pCNAdd $pCN1 $pCN2 |]
-    , [qType| $pCNTy |]
+  , ( const2 "infer lcPCNAdd should be (lcPCNTy -> lcPCNTy -> lcPCNTy)"
+    , lcPCNAdd
+    , [qType| $lcPCNTy -> $lcPCNTy -> $lcPCNTy |]
     )
-  , ( pCNMul
-    , [qType| $pCNTy -> $pCNTy -> $pCNTy |]
+  , ( const2 "infer (lcPCNAdd lcPCN1 lcPCN2) should be lcPCNTy"
+    , [qTerm| $lcPCNAdd $lcPCN1 $lcPCN2 |]
+    , [qType| $lcPCNTy |]
     )
-  , ( [qTerm| $pCNMul $pCN0 |]
-    , [qType| $pCNTy -> $pCNTy |]
+  , ( const2 "infer lcPCNMul should be (lcPCNTy -> lcPCNTy -> lcPCNTy)"
+    , lcPCNMul
+    , [qType| $lcPCNTy -> $lcPCNTy -> $lcPCNTy |]
+    )
+  , ( const2 "infer (lcPCNMul lcPCN0) should be (lcPCNTy -> lcPCNTy)"
+    , [qTerm| $lcPCNMul $lcPCN0 |]
+    , [qType| $lcPCNTy -> $lcPCNTy |]
     )
   ]
-  where
-    baseId = [qTerm| \x : # . x |]
-    baseArr = [qType| # -> # |]
-
-    -- Pseudo Church Numeral tests
-    pCNTy = [qType| $baseArr -> $baseArr |]
-
-    pCN0 = [qTerm| \s : $baseArr . $baseId |]
-    pCN1 = [qTerm| \s : $baseArr . \z : # . s z |]
-    pCN2 = [qTerm| \s : $baseArr . \z : # . s (s z) |]
-    pCN3 = [qTerm| \s : $baseArr . \z : # . s (s (s z)) |]
-    pCNAdd =
-      [qTerm|
-         \n : $pCNTy . \m : $pCNTy .
-         \s : $baseArr . \z : # . n s (m s z)
-      |]
-    pCNMul =
-      [qTerm|
-         \n : $pCNTy . \m : $pCNTy .
-         \s : $baseArr . \z : # . n (m s) z
-      |]
 
 evaluateSpec :: SpecWith ()
-evaluateSpec = forM_ evaluateSpecCases $ \(extTm, extResTm) -> do
+evaluateSpec = forM_ evaluateSpecCases $ \(mkTitle, extTm, extResTm) -> do
   let
     tm = elaborate extTm
     resTm = elaborate extResTm
-    caseTitle =
-      concat
-      [ "liftLCValue (evaluate ("
-      , Text.unpack (prettyUnnamedTerm tm)
-      , ")) should be ("
-      , Text.unpack (prettyUnnamedTerm resTm)
-      , ")"
-      ]
-  it caseTitle $ do
-    liftLCValue (evaluate tm) `shouldBe` resTm
+  it (mkTitle tm resTm) $ do
+    void . Control.Exception.evaluate $ infer tm
+    void . Control.Exception.evaluate $ infer resTm
+    TestLCTerm (liftLCValue (evaluate tm)) `shouldBe` TestLCTerm (liftLCValue (evaluate resTm))
 
-evaluateSpecCases :: [(ExtLCTerm, ExtLCTerm)]
-evaluateSpecCases = []
+evaluateSpecCases :: [(LCTerm -> LCTerm -> String, ExtLCTerm, ExtLCTerm)]
+evaluateSpecCases =
+  [ ( makeDefaultEvaluateTitle
+    , [qTerm| (\abc : $lcBaseArr . (\fdd : $lcBaseArr -> $lcBaseArr . fdd abc)) $lcBaseId |]
+    , [qTerm| \fdd : $lcBaseArr -> $lcBaseArr . fdd $lcBaseId |]
+    )
+  , ( const2 "evaluate (lcBaseArrId lcBaseId) should be lcBaseId"
+    , [qTerm| $lcBaseArrId $lcBaseId |]
+    , lcBaseId
+    )
+  , ( const2 "evaluate (lcBaseArrId (lcBaseArrId lcBaseId)) should be lcBaseId"
+    , [qTerm| $lcBaseArrId ($lcBaseArrId $lcBaseId) |]
+    , lcBaseId
+    )
+  , ( const2 "evaluate (lcPCNAdd lcPCN1 lcPCN2) should be lcPCN3 with unnormalized parts"
+    , [qTerm| $lcPCNAdd $lcPCN1 $lcPCN2 |]
+    , [qTerm| \s : $lcBaseArr . \z : # . $lcPCN1 s ($lcPCN2 s z) |]
+    )
+  ]
 
 normalizeSpec :: SpecWith ()
-normalizeSpec = forM_ normalizeSpecCases $ \(extTm, extResTm) -> do
+normalizeSpec = forM_ normalizeSpecCases $ \(mkTitle, extTm, extResTm) -> do
   let
     tm = elaborate extTm
     resTm = elaborate extResTm
-    caseTitle =
-      concat
-      [ "liftLCValue (normalize ("
-      , Text.unpack (prettyUnnamedTerm tm)
-      , ")) should be ("
-      , Text.unpack (prettyUnnamedTerm resTm)
-      , ")"
-      ]
-  it caseTitle $ do
-    liftLCNormal (normalize tm) `shouldBe` resTm
+  it (mkTitle tm resTm) $ do
+    void . Control.Exception.evaluate $ infer tm
+    void . Control.Exception.evaluate $ infer resTm
+    TestLCTerm (liftLCNormal (normalize tm)) `shouldBe` TestLCTerm (liftLCNormal (normalize resTm))
 
-normalizeSpecCases :: [(ExtLCTerm, ExtLCTerm)]
-normalizeSpecCases = []
+normalizeSpecCases :: [(LCTerm -> LCTerm -> String, ExtLCTerm, ExtLCTerm)]
+normalizeSpecCases =
+  [ ( makeDefaultNormalizeTitle
+    , [qTerm| (\abc : $lcBaseArr . (\fdd : $lcBaseArr -> $lcBaseArr . fdd abc)) $lcBaseId |]
+    , [qTerm| \fdd : $lcBaseArr -> $lcBaseArr . fdd $lcBaseId |]
+    )
+  , ( const2 "normalize (lcBaseArrId lcBaseId) should be lcBaseId"
+    , [qTerm| $lcBaseArrId $lcBaseId |]
+    , lcBaseId
+    )
+  , ( const2 "normalize (lcBaseArrId (lcBaseArrId lcBaseId)) should be lcBaseId"
+    , [qTerm| $lcBaseArrId ($lcBaseArrId $lcBaseId) |]
+    , lcBaseId
+    )
+  , ( const2 "normalize (lcPCNAdd lcPCN1 lcPCN2) should be lcPCN3"
+    , [qTerm| $lcPCNAdd $lcPCN0 $lcPCN1 |]
+    , lcPCN1
+    )
+  , ( const2 "normalize (lcPCN4 lcBaseId) should be lcBaseId"
+    , [qTerm| $lcPCN4 $lcBaseId |]
+    , lcBaseId
+    )
+  ]
+
+makeDefaultInferTitle :: LCTerm -> LCType -> String
+makeDefaultInferTitle tm ty =
+  makeDefaultTitle
+  "infer"
+  (Text.unpack (prettyUnnamedTerm tm))
+  (Text.unpack (prettyUnnamedType ty))
+
+makeDefaultEvaluateTitle :: LCTerm -> LCTerm -> String
+makeDefaultEvaluateTitle tm resTm =
+  makeDefaultTitle
+  "evaluate"
+  (Text.unpack (prettyUnnamedTerm tm))
+  (Text.unpack (prettyUnnamedTerm resTm))
+
+makeDefaultNormalizeTitle :: LCTerm -> LCTerm -> String
+makeDefaultNormalizeTitle tm resTm =
+  makeDefaultTitle
+  "normalize"
+  (Text.unpack (prettyUnnamedTerm tm))
+  (Text.unpack (prettyUnnamedTerm resTm))
