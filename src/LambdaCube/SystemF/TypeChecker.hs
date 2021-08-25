@@ -17,7 +17,7 @@ infer = go []
       = rt
       | otherwise
       = error "Function argument type mismatch"
-    go tl (LCTLam b) = LCUniv $ go tl b
+    go tl (LCTLam b) = LCUniv $ go (fmap (shiftType . (, 1)) tl) b
     go tl (LCTApp f t)
       | LCUniv rt <- go tl f
       = substituteTypeInType t 0 rt

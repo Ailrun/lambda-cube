@@ -41,7 +41,7 @@ infer = go [] []
       = rt
       | otherwise
       = error "Function argument type mismatch"
-    go kl tl (LCTLam k b) = LCUniv k $ go (k : kl) tl b
+    go kl tl (LCTLam k b) = LCUniv k $ go (k : kl) (fmap (shiftType . (, 1)) tl) b
     go kl tl (LCTApp f t)
       | LCUniv tk rt <- go kl tl f
       , tk == inferKind kl t

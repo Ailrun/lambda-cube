@@ -5,6 +5,8 @@ module LambdaCube.SystemFw.Substitution
   , substituteValue
   , substituteNormalInNormal
   , substituteTypeInNormal
+
+  , shiftType
   ) where
 
 import           LambdaCube.SystemFw.Ast

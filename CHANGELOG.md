@@ -8,8 +8,9 @@
 
 ## Bug fixed
 
-- Substitutions are fixed with valid shifting
-- STLC normalizer is fixed with valid beta-reduction
+- Substitutions are fixed with valid shifting.
+- STLC normalizer is fixed with valid beta-reduction.
+- Fix type inference for System F and System F omega.
 
 ## Breaking changes
 
