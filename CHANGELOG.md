@@ -4,6 +4,10 @@
 
 - Type/Kind level quasiquoter are added.
 
+## Bug fixed
+
+- Substitutions are fixed with valid shifting
+
 ## Breaking changes
 
 - Names of quasiquoters are changed.
