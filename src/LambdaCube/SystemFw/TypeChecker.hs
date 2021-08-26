@@ -45,9 +45,11 @@ infer = go [] []
     go kl tl (LCTApp f t)
       | LCUniv tk rt <- go kl tl f
       , tk == inferKind kl t
-      = substituteTypeInType t 0 rt
+      = substituteTypeInType v 0 rt
       | otherwise
       = error "Function argument kind mismatch"
+      where
+        v = reduceType t
 
 inferKind :: [LCKind] -> LCType -> LCKind
 inferKind = go
