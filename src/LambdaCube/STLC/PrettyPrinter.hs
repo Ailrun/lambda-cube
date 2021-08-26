@@ -4,7 +4,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 module LambdaCube.STLC.PrettyPrinter
   ( prettyUnnamedTerm
+  , prettyShowUnnamedTerm
   , prettyUnnamedType
+  , prettyShowUnnamedType
   ) where
 
 import           Data.Text                       (Text)
@@ -15,8 +17,14 @@ import           LambdaCube.STLC.Ast
 prettyUnnamedTerm :: LCTerm -> Text
 prettyUnnamedTerm = prettyUnnamedTermPrec 0
 
+prettyShowUnnamedTerm :: LCTerm -> String
+prettyShowUnnamedTerm = Text.unpack . prettyUnnamedTerm
+
 prettyUnnamedType :: LCType -> Text
 prettyUnnamedType = prettyUnnamedTypePrec 0
+
+prettyShowUnnamedType :: LCType -> String
+prettyShowUnnamedType = Text.unpack . prettyUnnamedType
 
 prettyUnnamedTermPrec :: Int -> LCTerm -> Text
 prettyUnnamedTermPrec = go

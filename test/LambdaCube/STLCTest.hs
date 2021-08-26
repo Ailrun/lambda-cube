@@ -150,19 +150,19 @@ makeDefaultInferTitle :: LCTerm -> LCType -> String
 makeDefaultInferTitle tm ty =
   makeDefaultTitle
   "infer"
-  (Text.unpack (prettyUnnamedTerm tm))
-  (Text.unpack (prettyUnnamedType ty))
+  (prettyShowUnnamedTerm tm)
+  (prettyShowUnnamedType ty)
 
 makeDefaultEvaluateTitle :: LCTerm -> LCTerm -> String
 makeDefaultEvaluateTitle tm resTm =
   makeDefaultTitle
   "evaluate"
-  (Text.unpack (prettyUnnamedTerm tm))
-  (Text.unpack (prettyUnnamedTerm resTm))
+  (prettyShowUnnamedTerm tm)
+  (prettyShowUnnamedTerm resTm)
 
 makeDefaultNormalizeTitle :: LCTerm -> LCTerm -> String
 makeDefaultNormalizeTitle tm resTm =
   makeDefaultTitle
   "normalize"
-  (Text.unpack (prettyUnnamedTerm tm))
-  (Text.unpack (prettyUnnamedTerm resTm))
+  (prettyShowUnnamedTerm tm)
+  (prettyShowUnnamedTerm resTm)

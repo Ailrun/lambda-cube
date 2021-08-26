@@ -4,8 +4,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module LambdaCube.SystemFw_.PrettyPrinter
   ( prettyUnnamedTerm
+  , prettyShowUnnamedTerm
   , prettyUnnamedType
+  , prettyShowUnnamedType
   , prettyUnnamedKind
+  , prettyShowUnnamedKind
   ) where
 
 import           Data.Text                       (Text)
@@ -16,11 +19,20 @@ import           LambdaCube.SystemFw_.Ast
 prettyUnnamedTerm :: LCTerm -> Text
 prettyUnnamedTerm = prettyUnnamedTermPrec 0
 
+prettyShowUnnamedTerm :: LCTerm -> String
+prettyShowUnnamedTerm = Text.unpack . prettyUnnamedTerm
+
 prettyUnnamedType :: LCType -> Text
 prettyUnnamedType = prettyUnnamedTypePrec 0
 
+prettyShowUnnamedType :: LCType -> String
+prettyShowUnnamedType = Text.unpack . prettyUnnamedType
+
 prettyUnnamedKind :: LCKind -> Text
 prettyUnnamedKind = prettyUnnamedKindPrec 0
+
+prettyShowUnnamedKind :: LCKind -> String
+prettyShowUnnamedKind = Text.unpack . prettyUnnamedKind
 
 prettyUnnamedTermPrec :: Int -> LCTerm -> Text
 prettyUnnamedTermPrec = go
