@@ -10,7 +10,6 @@ import           Data.Maybe               (isJust)
 import           LambdaCube.Common.Parser
 import           LambdaCube.SystemF.Ast
 import           Text.Megaparsec
-import qualified Data.Text as Text
 
 pTopTerm :: Parser ExtLCTerm
 pTopTerm = topParser pTerm
@@ -48,7 +47,7 @@ pVar :: Parser ExtLCTerm
 pVar = ExtLCVar <$> identifier
 
 pMVar :: Parser ExtLCTerm
-pMVar = ExtLCMVar <$> (dollarsign *> fmap Text.unpack identifier)
+pMVar = ExtLCMVar <$> metaIdentifier
 
 pTopType :: Parser ExtLCType
 pTopType = topParser pType
@@ -75,4 +74,4 @@ pTVar :: Parser ExtLCType
 pTVar = ExtLCTVar <$> identifier
 
 pMTVar :: Parser ExtLCType
-pMTVar = ExtLCMTVar <$> (dollarsign *> fmap Text.unpack identifier)
+pMTVar = ExtLCMTVar <$> metaIdentifier

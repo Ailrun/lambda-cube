@@ -19,6 +19,7 @@ substDefValue = go
     go dv     x (LCVar ((== x) -> True))  = shiftValue dv
     go _      x e@(LCVar ((< x) -> True)) = e
     go _      _ (LCVar y)                 = LCVar $ y - 1
+    go _      _ (LCGlobal y)              = LCGlobal y
     go (v, s) x (LCLam t b)               = LCLam t $ go (v, s + 1) (x + 1) b
     go dv     x (LCApp f a)               = go dv x f `LCApp` go dv x a
 
@@ -41,18 +42,19 @@ substDefNormalInNeutral dv x = go
       where
         a' = substDefNormalInNormal dv x a
 
-shift :: (LCTerm, Int) -> LCTerm
-shift = shiftMin 0
+shiftTerm :: (LCTerm, Int) -> LCTerm
+shiftTerm = shiftTermMin 0
 
-shiftMin :: Int -> (LCTerm, Int) -> LCTerm
-shiftMin n' (v, s) = go n' v
+shiftTermMin :: Int -> (LCTerm, Int) -> LCTerm
+shiftTermMin n' (v, s) = go n' v
   where
-    go n (LCVar x)   = LCVar $ if x < n then x else x + s
-    go n (LCLam t b) = LCLam t $ go (n + 1) b
-    go n (LCApp f a) = go n f `LCApp` go n a
+    go n (LCVar x)    = LCVar $ if x < n then x else x + s
+    go _ (LCGlobal x) = LCGlobal x
+    go n (LCLam t b)  = LCLam t $ go (n + 1) b
+    go n (LCApp f a)  = go n f `LCApp` go n a
 
 shiftValue :: (LCValue, Int) -> LCTerm
-shiftValue (v, s) = shift (liftLCValue v, s)
+shiftValue (v, s) = shiftTerm (liftLCValue v, s)
 
 shiftNormal :: (LCNormalTerm, Int) -> LCNormalTerm
 shiftNormal = shiftNormalMin 0

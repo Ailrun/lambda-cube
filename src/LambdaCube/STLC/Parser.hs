@@ -1,14 +1,38 @@
 module LambdaCube.STLC.Parser
-  ( pTopTerm
+  ( pTopModule
+  , pTopTerm
   , pTopType
   ) where
 
 import           Data.Foldable            (Foldable (foldl'))
 import           Data.Functor             (($>))
-import qualified Data.Text                as Text
 import           LambdaCube.Common.Parser
 import           LambdaCube.STLC.Ast
 import           Text.Megaparsec
+
+pTopModule :: Parser ExtLCModule
+pTopModule = topParser pModule
+
+pModule :: Parser ExtLCModule
+pModule = ExtLCModule <$> sepEndBy pModuleDecl semicolon
+
+pModuleDecl :: Parser ExtLCModuleDecl
+pModuleDecl = pModuleSplice <|> pModuleTypeDecl <|> pModuleTermDecl
+
+pModuleSplice :: Parser ExtLCModuleDecl
+pModuleSplice = ExtLCModuleSplice . ExtLCMMVar <$> metaIdentifier
+
+pModuleTermDecl :: Parser ExtLCModuleDecl
+pModuleTermDecl =
+  ExtLCModuleTermDecl
+  <$> identifier
+  <*> (equalsign *> pTerm)
+
+pModuleTypeDecl :: Parser ExtLCModuleDecl
+pModuleTypeDecl =
+  ExtLCModuleTypeDecl
+  <$> (tripleColon *> identifier)
+  <*> (equalsign *> pType)
 
 pTopTerm :: Parser ExtLCTerm
 pTopTerm = topParser pTerm
@@ -33,7 +57,7 @@ pVar :: Parser ExtLCTerm
 pVar = ExtLCVar <$> identifier
 
 pMVar :: Parser ExtLCTerm
-pMVar = ExtLCMVar <$> (dollarsign *> fmap Text.unpack identifier)
+pMVar = ExtLCMVar <$> metaIdentifier
 
 pTopType :: Parser ExtLCType
 pTopType = topParser pType
@@ -48,4 +72,4 @@ pBase :: Parser ExtLCType
 pBase = sharp $> ExtLCBase
 
 pMTVar :: Parser ExtLCType
-pMTVar = ExtLCMTVar <$> (dollarsign *> fmap Text.unpack identifier)
+pMTVar = ExtLCMTVar <$> metaIdentifier

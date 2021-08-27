@@ -1,26 +1,50 @@
-module LambdaCube.STLC.Ast where
+module LambdaCube.STLC.Ast
+  ( module LambdaCube.STLC.Ast
+  , module LambdaCube.Common.Ast
+  ) where
 
 import           Data.Data                  (Data)
-import           Data.Text                  (Text)
+import           LambdaCube.Common.Ast
 import           Language.Haskell.TH.Syntax (Lift)
 
+data ExtLCModule
+  = ExtLCModule [ExtLCModuleDecl]
+  | ExtLCMMVar MetaIdentifier
+  deriving stock (Eq, Show, Data, Lift)
+
+data ExtLCModuleDecl
+  = ExtLCModuleTermDecl Identifier ExtLCTerm
+  | ExtLCModuleTypeDecl Identifier ExtLCType
+  | ExtLCModuleSplice ExtLCModule
+  deriving stock (Eq, Show, Data, Lift)
+
 data ExtLCTerm
-  = ExtLCVar Text
-  | ExtLCLam Text ExtLCType ExtLCTerm
+  = ExtLCVar Identifier
+  | ExtLCLam Identifier ExtLCType ExtLCTerm
   | ExtLCApp ExtLCTerm ExtLCTerm
-  | ExtLCMVar String
+  | ExtLCMVar MetaIdentifier
   deriving stock (Eq, Show, Data, Lift)
 infixl 6 `ExtLCApp`
 
 data ExtLCType
   = ExtLCBase
+  | ExtLCTVar Identifier
   | ExtLCArr ExtLCType ExtLCType
-  | ExtLCMTVar String
+  | ExtLCMTVar MetaIdentifier
   deriving stock (Eq, Show, Data, Lift)
 infixr 5 `ExtLCArr`
 
+newtype LCModule = LCModule { getModuleDecls :: [LCModuleDecl] }
+  deriving stock (Eq, Show, Data, Lift)
+
+data LCModuleDecl
+  = LCModuleTermDecl Identifier LCTerm
+  | LCModuleTypeDecl Identifier LCType
+  deriving stock (Eq, Show, Data, Lift)
+
 data LCTerm
   = LCVar Int
+  | LCGlobal Identifier
   | LCLam LCType LCTerm
   | LCApp LCTerm LCTerm
   deriving stock (Eq, Show, Data, Lift)
@@ -28,6 +52,7 @@ infixl 6 `LCApp`
 
 data LCType
   = LCBase
+  | LCTGlobal Identifier
   | LCArr LCType LCType
   deriving stock (Eq, Show, Data, Lift)
 infixr 5 `LCArr`

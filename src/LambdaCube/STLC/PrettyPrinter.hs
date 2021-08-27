@@ -31,12 +31,14 @@ prettyUnnamedTermPrec = go
   where
     pTP = prettyUnnamedTypePrec
 
-    go _ (LCVar x)   = Text.pack $ show x
-    go p (LCLam t b) = wrapIfSpaced (p > 0) ["\\ :", pTP 0 t, ".", go 0 b]
-    go p (LCApp f a) = wrapIfSpaced (p > 1) [go 1 f, go 2 a]
+    go _ (LCVar x)    = Text.pack $ show x
+    go _ (LCGlobal x) = x
+    go p (LCLam t b)  = wrapIfSpaced (p > 0) ["\\ :", pTP 0 t, ".", go 0 b]
+    go p (LCApp f a)  = wrapIfSpaced (p > 1) [go 1 f, go 2 a]
 
 prettyUnnamedTypePrec :: Int -> LCType -> Text
 prettyUnnamedTypePrec = go
   where
-    go _ LCBase      = "#"
-    go p (LCArr a b) = wrapIfSpaced (p > 0) [go 1 a, "->", go 0 b]
+    go _ LCBase        = "#"
+    go _ (LCTGlobal p) = p
+    go p (LCArr a b)   = wrapIfSpaced (p > 0) [go 1 a, "->", go 0 b]

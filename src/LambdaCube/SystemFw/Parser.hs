@@ -8,7 +8,6 @@ import           Data.Foldable            (Foldable (foldl'))
 import           Data.Function            ((&))
 import           Data.Functor             (($>))
 import           Data.Maybe               (isJust)
-import qualified Data.Text                as Text
 import           LambdaCube.Common.Parser
 import           LambdaCube.SystemFw.Ast
 import           Text.Megaparsec
@@ -50,7 +49,7 @@ pVar :: Parser ExtLCTerm
 pVar = ExtLCVar <$> identifier
 
 pMVar :: Parser ExtLCTerm
-pMVar = ExtLCMVar <$> (dollarsign *> fmap Text.unpack identifier)
+pMVar = ExtLCMVar <$> metaIdentifier
 
 pTopType :: Parser ExtLCType
 pTopType = topParser pType
@@ -88,7 +87,7 @@ pTVar :: Parser ExtLCType
 pTVar = ExtLCTVar <$> identifier
 
 pMTVar :: Parser ExtLCType
-pMTVar = ExtLCMTVar <$> (dollarsign *> fmap Text.unpack identifier)
+pMTVar = ExtLCMTVar <$> metaIdentifier
 
 pTopKind :: Parser ExtLCKind
 pTopKind = topParser pKind
@@ -103,4 +102,4 @@ pStar :: Parser ExtLCKind
 pStar = asterisk $> ExtLCStar
 
 pMKVar :: Parser ExtLCKind
-pMKVar = ExtLCMKVar <$> (dollarsign *> fmap Text.unpack identifier)
+pMKVar = ExtLCMKVar <$> metaIdentifier

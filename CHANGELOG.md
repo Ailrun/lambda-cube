@@ -1,5 +1,17 @@
 # Unreleased
 
+## Main updates
+
+- Now systems support top-level definitions.
+
+## Breaking changes
+
+- Names of elaborators are changed.
+- Names of evaluators are changed.
+- Names of type checkers are changed.
+- Names of normalizer are changed.
+- `dollarsign` common parser is removed.
+
 # 0.3.0.0
 
 ## Main updates
